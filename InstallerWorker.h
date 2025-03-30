@@ -24,6 +24,8 @@ public slots:
 private:
     QVector<QPair<QUrl, QString>> tools;
     QString installPath;
+private:
+    void installVcpkg();
 };
 
 #endif // INSTALLERWORKER_H

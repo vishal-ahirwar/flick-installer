@@ -25,20 +25,15 @@ ApplicationWindow {
         anchors.fill: parent
         radius: 25
         color: "#0C0C0C"
+        Text{
+            id:info
+            visible: !btnStart.visible
+            text: DownloadManager.file_name
+            anchors.fill: btnStart
+            horizontalAlignment: Text.AlignHCenter
+            color: "#FFFFFF"
+        }
         ProgressBar{
-
-            Text{
-                id:progressBarText
-                text: DownloadManager.file_name
-                anchors{
-                    top:parent.bottom
-                    left: parent.left
-                    right:parent.right
-                    topMargin: 15
-                }
-                horizontalAlignment: Text.AlignHCenter
-                color: "#FFFFFF"
-            }
 
             id:progressBar
             anchors.centerIn: parent
@@ -121,6 +116,7 @@ ApplicationWindow {
             anchors.centerIn: parent
             width: 145
             height: 55
+            visible: DownloadManager.can_procceed
             background: Rectangle{
                 width: parent.width
                 height:parent.height

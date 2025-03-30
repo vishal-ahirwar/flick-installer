@@ -31,10 +31,14 @@ Utild::Utild(QObject *parent)
     connect(this, &Utild::downloadingFinished, this, &Utild::onDowloadingFinished, Qt::QueuedConnection);
     connect(this, &Utild::installingFinished, this, &Utild::addToPath, Qt::QueuedConnection);
     connect(this, &Utild::addToPathFinished, this, &Utild::onAddToPathFinished, Qt::QueuedConnection);
+    connect(this,&Utild::downloadFailed,this,&Utild::errorOccured);
+    setFilName("Checking if Required Tools are installed or not");
+    QTimer::singleShot(1000,[this](){canProceed();});
 };
 
 
 void Utild::onError(QNetworkReply::NetworkError err){
+
 }
 void Utild::downloadProgress(qint64 recieved,qint64 total){
     if(total==0)return;
@@ -100,6 +104,11 @@ void whatExist(const QString&file){
     }
 }
 void Utild::download(const QUrl &url, const QString &file_path) {
+    if (!download_flag) {
+        setFilName("Download halted due to previous failure.");
+        return;
+    }
+
     setDownloadProgress(0);
     if(QFile(file_path).exists()){
         setFilName(file_path+" already exist!");
@@ -112,7 +121,7 @@ void Utild::download(const QUrl &url, const QString &file_path) {
          auto res = _m.get(req);
 
          connect(res, &QNetworkReply::errorOccurred, this, [this, file_path, res]() {
-             setFilName ("Error while downloading " + file_path + ": " + res->errorString());
+             emit downloadFailed("Error while downloading " + file_path + ": " + res->errorString());
          });
 
          connect(res, &QNetworkReply::downloadProgress, this, [this](auto rec, auto total) {
@@ -152,8 +161,8 @@ void Utild::downloadNext() {
         download(tools.at(_current_index).first, tools.at(_current_index).second);
     } else {
          setFilName("Downloading Finished");
-        qDebug() << "Downloading finished";
-        emit downloadingFinished();
+         qDebug() << "Downloading finished";
+         emit downloadingFinished();
     }
 }
 void Utild::installing() {
@@ -201,7 +210,7 @@ void Utild::addToPath() {
                     continue;
                 };
 
-                if(QDir::cleanPath(p)!=home){
+                if((QDir::cleanPath(p)!=home)&&(!QDir::cleanPath(p).endsWith("vcpkg"))){
                     p+="/bin";
                 }
                 qDebug()<<"adding to path : "<<QDir::cleanPath(p);
@@ -227,4 +236,37 @@ void Utild::onAddToPathFinished(){
     setFilName("Aura has been succesfully installed!");
     emit complete();
 };
+
+
+bool Utild::can_procceed() const
+{
+    return m_can_procceed;
+}
+
+void Utild::setCan_procceed(bool newCan_procceed)
+{
+    if (m_can_procceed == newCan_procceed)
+        return;
+    m_can_procceed = newCan_procceed;
+    emit can_procceedChanged();
+}
+void Utild::canProceed()
+{
+    QProcess process;
+    process.start("git", QStringList() << "--version");
+
+    if (!process.waitForFinished() || process.error() == QProcess::FailedToStart) {
+        setCan_procceed(false);
+        setFilName("Git is not installed or failed to start");
+        return;
+    }
+
+    setCan_procceed(true);
+}
+
+void Utild::errorOccured(QString error)
+{
+    setFilName(error);
+    download_flag=false;
+}
 

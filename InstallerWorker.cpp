@@ -2,7 +2,9 @@
 #include<QUrl>
 #include<QTimer>
 
-InstallerWorker::InstallerWorker(const QVector<QPair<QUrl, QString>>& tools, const QString& path): tools(tools), installPath(path) {};
+InstallerWorker::InstallerWorker(const QVector<QPair<QUrl, QString>>& tools, const QString& path): tools(tools), installPath(path) {
+
+};
 void InstallerWorker::run() {
     QDir homeDir(installPath);
 
@@ -14,7 +16,7 @@ void InstallerWorker::run() {
 
     float progressStep = 1.0f / tools.size();
     float currentProgress = 0.2f;
-
+    installVcpkg();
     for (const auto& tool : tools) {
         QString file = tool.second;
         emit updateStatus("Installing " + file);
@@ -115,3 +117,35 @@ void InstallerWorker::run() {
 
     emit finished();
 }
+
+void InstallerWorker::installVcpkg()
+{
+    emit updateStatus("Installing vcpkg...");
+    emit updateProgress(0.2);
+        QProcess process;
+        connect(&process,&QProcess::errorOccurred,this,[this](QProcess::ProcessError error){
+            switch (error) {
+            case QProcess::Timedout:
+                emit updateStatus("timeout");
+                break;
+            case QProcess::Crashed:
+                emit updateStatus("crashed");
+                break;
+            case QProcess::UnknownError:
+                emit updateStatus("Unknown error");
+                break;
+            }
+        });
+        auto path=QDir::homePath()+"/aura/vcpkg";
+        process.start("git",QStringList()<<"clone"<<"https://github.com/microsoft/vcpkg.git"<<path);
+        process.waitForFinished();
+            QProcess c;
+        c.start("powershell", QStringList()
+                                  << "-Command"
+                                  << QString("setx VCPKG_ROOT \"%1\"").arg(QDir::cleanPath(path)));
+            c.waitForFinished();
+
+    }
+
+
+

@@ -7,11 +7,16 @@ ApplicationWindow {
     width: 456; height: 529
     color: "transparent"
     flags: Qt.FramelessWindowHint
-
+    property var btnAbortAction:function(){
+                    Qt.quit()
+    }
     Connections{
         target: DownloadManager
         onComplete:{
             btnAbort.text="Restart System"
+            btnAbortAction=function(){
+                //TODO
+            }
         }
     }
 
@@ -23,7 +28,7 @@ ApplicationWindow {
 
             Text{
                 id:progressBarText
-                text: "Downloading "+DownloadManager.file_name+" ..."
+                text: DownloadManager.file_name
                 anchors{
                     top:parent.bottom
                     left: parent.left
@@ -164,7 +169,7 @@ ApplicationWindow {
 
             }
             onClicked: {
-                Qt.quit()
+                btnAbortAction()
             }
         }
 

@@ -3,32 +3,34 @@
 #include<QtAlgorithms>
 #include<QFile>
 #include<QFileInfo>
-//{QUrl("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"),"../clang+llvm19.1.7-windows.tar.xz"}
-const static QVector<QPair<QUrl,QString>> tools{
-                          {QUrl("https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"),"../utool.exe"},
-                          {QUrl("https://aka.ms/vs/17/release/vs_BuildTools.exe"),"../vs_build_tools.exe"},
-                          {QUrl("https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"),"../ninja-win.zip"},
-                          {QUrl("https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"),"../cmake-windows.zip"},
-                          {QUrl("https://github.com/vishal-ahirwar/aura/releases/latest/aura.exe"),"../aura.exe"}
+#include<QProcess>
+#include<QStandardPaths>
+#include<QDir>
+#include<QTimer>
+#include<QSettings>
+#include<QDirIterator>
+#include<QThread>
+#include<InstallerWorker.h>
+#include<QCoreApplication>
+void whatExist(const QString&file);
+namespace fs=std::filesystem;
+// /
+//
+const static QVector<QPair<QUrl,QString>> tools{{QUrl("https://aka.ms/vs/17/release/vs_BuildTools.exe"),"vs_build_tools.exe"},
+                          {QUrl("https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"),"ninja-win.zip"},
+                          {QUrl("https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"),"cmake-windows.zip"},
+                          {QUrl("https://github.com/vishal-ahirwar/aura/releases/latest/download/aura.exe"),"aura.exe"},
+                          {QUrl("https://raw.githubusercontent.com/vishal-ahirwar/aura/refs/heads/master/res/aura.vsconfig"),"aura.vsconfig"},
+                        {QUrl("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"),"clang+llvm19.1.7-windows.tar.xz"}
 };
 
 Utild::Utild(QObject *parent)
-    : QObject{parent}
+    : QObject{parent},_current_index{0}
 {
-    _manager=new QNetworkAccessManager(this);
-}
-
-void Utild::download(const QUrl &url, const QString &file_path)
-{
-    setDownloadProgress(0);
-    setFilName(QFileInfo(file_path).fileName());
-    QNetworkRequest req;
-    _file=new QFile(file_path,this);
-    req.setUrl(url);
-    _reply=_manager->get(req);
-    connect(_reply,&QNetworkReply::errorOccurred,this,&Utild::onError);
-    connect(_reply,&QNetworkReply::downloadProgress,this,&Utild::downloadProgress);
-    connect(_reply,&QNetworkReply::finished,this,&Utild::onDownloadFinished);
+    // Connect signals with queued connection to ensure proper sequence
+    connect(this, &Utild::downloadingFinished, this, &Utild::onDowloadingFinished, Qt::QueuedConnection);
+    connect(this, &Utild::installingFinished, this, &Utild::addToPath, Qt::QueuedConnection);
+    connect(this, &Utild::addToPathFinished, this, &Utild::onAddToPathFinished, Qt::QueuedConnection);
 };
 
 
@@ -41,20 +43,13 @@ void Utild::downloadProgress(qint64 recieved,qint64 total){
 
 void Utild::onDownloadFinished(){
     setDownloadProgress(1.0);
-    if(!_file)return;
-    if(!_file->open(QIODevice::WriteOnly)){
-        _reply->deleteLater();
-        return;
-    };
-    _file->write(_reply->readAll());
-    _file->close();
-    _reply->deleteLater();
-    _file->deleteLater();
+
     downloadNext();
 }
 
 void Utild::setDownloadProgress(float newDownloadProgress)
 {
+    qDebug() << newDownloadProgress;
     if (qFuzzyCompare(_download_progress, newDownloadProgress))
         return;
     _download_progress = newDownloadProgress;
@@ -68,6 +63,7 @@ QString Utild::fileName() const
 
 void Utild::setFilName(const QString &newFile_name)
 {
+    qDebug() << newFile_name;
     if (_file_name == newFile_name)
         return;
     _file_name = newFile_name;
@@ -76,17 +72,159 @@ void Utild::setFilName(const QString &newFile_name)
 
 void Utild::start()
 {
-    download(tools.at(tools.size()-1).first,tools.at(tools.size()-1).second);
+    // for(const auto&tool:tools){
+    //     whatExist(tool.second);
+    // }
+    _current_index = 0;  // Reset index when starting
+    download(tools.first().first, tools.first().second);
+}
+
+void Utild::reboot()
+{
+#ifdef Q_OS_WIN
+    QProcess::startDetached("shutdown", {"/r", "/t", "0"});
+#elif defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
+    QProcess::startDetached("sudo", {"reboot"});
+#elif defined(Q_OS_MAC)
+    QProcess::startDetached("sudo", {"shutdown", "-r", "now"});
+#endif
+    QCoreApplication::quit();
 };
 
-void Utild::downloadNext(){
-    static int index=tools.size()-1;
-    index-=1;
-    if(index>=0){
-         download(tools.at(index).first,tools.at(index).second);
+void whatExist(const QString&file){
+    if(QFile(file).exists()){
+        qDebug()<<QFileInfo(file).completeSuffix();
+        qDebug()<<file<<" exist";
     }else{
-        emit complete();
+        qDebug()<<file<<" doesn't exist";
+    }
+}
+void Utild::download(const QUrl &url, const QString &file_path) {
+    setDownloadProgress(0);
+    if(QFile(file_path).exists()){
+        setFilName(file_path+" already exist!");
+        downloadNext();
         return;
     }
+    setFilName("Downloading " + QFileInfo(file_path).fileName());
+    QTimer::singleShot(1000,[this,file_path,url](){
+         QNetworkRequest req{url};
+         auto res = _m.get(req);
+
+         connect(res, &QNetworkReply::errorOccurred, this, [this, file_path, res]() {
+             setFilName ("Error while downloading " + file_path + ": " + res->errorString());
+         });
+
+         connect(res, &QNetworkReply::downloadProgress, this, [this](auto rec, auto total) {
+             if (total > 0) {
+                 setDownloadProgress(static_cast<float>(rec) / static_cast<float>(total));
+             }
+         });
+
+         connect(res, &QNetworkReply::finished, this, [res, this, file_path]() {
+             setDownloadProgress(1.0);
+
+             if (res->error() == QNetworkReply::NoError) {
+                 QFile file(file_path);
+                 if (file.open(QIODevice::WriteOnly|QIODevice::Truncate | QIODevice::Unbuffered)) {
+                     file.write(res->readAll());
+                     file.close();
+                     setFilName("File " + file_path + " saved successfully.");
+                 } else {
+                     setFilName ("Failed to save file: " + file_path);
+                 }
+             } else {
+                 setFilName("Download failed for: " + file_path + " with error: " + res->errorString());
+             }
+
+             res->deleteLater();
+             downloadNext();
+         });
+     });
 
 }
+
+// Modify downloadNext() to increment instead of decrement
+void Utild::downloadNext() {
+    _current_index++;
+
+    if (_current_index < tools.size()) {
+        download(tools.at(_current_index).first, tools.at(_current_index).second);
+    } else {
+         setFilName("Downloading Finished");
+        qDebug() << "Downloading finished";
+        emit downloadingFinished();
+    }
+}
+void Utild::installing() {
+    setFilName("Installing tools...");
+
+    QTimer::singleShot(1000,[this](){
+        QString path = QDir::homePath() + "/aura";
+        QThread* thread = new QThread;
+        InstallerWorker* worker = new InstallerWorker(tools, path);
+
+        worker->moveToThread(thread);
+
+        connect(thread, &QThread::started, worker, &InstallerWorker::run);
+        connect(worker, &InstallerWorker::updateStatus, this, &Utild::setFilName);
+        connect(worker, &InstallerWorker::updateProgress, this, &Utild::setDownloadProgress);
+        connect(worker, &InstallerWorker::finished, this, [this,thread, worker]() {
+            thread->quit();
+            thread->wait();
+            worker->deleteLater();
+            thread->deleteLater();
+            emit installingFinished();
+        });
+
+        thread->start();
+    });
+}
+
+void Utild::addToPath() {
+    setFilName("Adding tools to PATH...");
+    setDownloadProgress(0.8);
+    QTimer::singleShot(1000,[this](){
+        auto home=QDir::homePath();
+        home+="/aura";
+        home=QDir::cleanPath(home);
+        auto r=QSettings("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", QSettings::NativeFormat).value("path").toString();
+        QDirIterator path(home,QDir::NoDotDot|QDir::AllEntries);
+        while(path.hasNext()){
+            auto p=path.next();
+
+            if(path.fileInfo().isFile()){
+                continue;
+            };
+            if(path.fileInfo().isDir()){
+                if(r.contains(p,Qt::CaseInsensitive)){
+                    continue;
+                };
+
+                if(QDir::cleanPath(p)!=home){
+                    p+="/bin";
+                }
+                qDebug()<<"adding to path : "<<QDir::cleanPath(p);
+                r.append(";"+QDir::cleanPath(p));
+            }
+        };
+        // Notify the system to reload environment variables
+        QProcess::execute("powershell", {"/c", "setx Path \"" + r + "\""});
+        emit addToPathFinished();
+    });
+
+}
+
+
+void Utild::onDowloadingFinished(){
+    installing();
+};
+void Utild::onInstallingFinished(){
+    addToPath();
+};
+void Utild::onAddToPathFinished(){
+    setDownloadProgress(1.0);
+    setFilName("Aura has been succesfully installed!");
+    emit complete();
+};
+

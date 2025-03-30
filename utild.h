@@ -6,6 +6,7 @@
 #include<QNetworkReply>
 #include<QFile>
 #include<QMap>
+#include<QThread>
 class Utild : public QObject
 {
     Q_OBJECT
@@ -24,23 +25,34 @@ public:
     QString fileName() const;
     void setFilName(const QString &new_file_name);
     Q_INVOKABLE void start();
+    Q_INVOKABLE void reboot();
 signals:
     void downloadProgressChanged();
 
     void fileNameChanged();
 
     void complete();
+
+    void downloadingFinished();
+
+    void installingFinished();
+    void addToPathFinished();
+private slots:
+    void onDowloadingFinished();
+    void  onInstallingFinished();
+    void onAddToPathFinished();
 private:
-    QNetworkAccessManager*_manager{};
-    QNetworkReply*_reply{};
-    float _download_progress;
-    QString _file_name;
-    QFile*_file{};
+    float _download_progress{};
+    QString _file_name{};
+    QNetworkAccessManager _m{};
+    qint16 _current_index{};
 private:
     void onError(QNetworkReply::NetworkError);
     void downloadProgress(qint64,qint64);
     void onDownloadFinished();
     void downloadNext();
+    void installing();
+    void addToPath();
 };
 
 #endif // UTILD_H

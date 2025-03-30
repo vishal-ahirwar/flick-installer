@@ -16,6 +16,7 @@ ApplicationWindow {
             btnAbort.text="Restart System"
             btnAbortAction=function(){
                 //TODO
+                DownloadManager.reboot()
             }
         }
     }

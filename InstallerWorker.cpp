@@ -114,7 +114,9 @@ void InstallerWorker::run() {
         currentProgress += progressStep;
         emit updateProgress(currentProgress);
     }
-
+#if _WIN32
+    ifVsAlreadyInstalled();
+#endif
     emit finished();
 }
 
@@ -146,6 +148,32 @@ void InstallerWorker::installVcpkg()
             c.waitForFinished();
 
     }
+
+void InstallerWorker::ifVsAlreadyInstalled()
+{
+    QProcess*process=new QProcess(this);
+    process->start("C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe",QStringList()<<"modify"<<"--installPath"<<"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools"<<"--config"<<"aura.vsconfig");
+    connect(process, &QProcess::readyReadStandardError, this, [process]() {
+        QByteArray errorOutput = process->readAllStandardError();
+        qDebug() << "Error:" << errorOutput;
+    });
+
+    connect(process, &QProcess::readyReadStandardOutput, this, [process]() {
+        QByteArray output = process->readAllStandardOutput();
+        qDebug() << "Output:" << output;
+    });
+    if (!process->waitForStarted()) {
+        emit updateStatus("Failed to start install Visual C++ Component");
+        return;
+    }
+
+    if (!process->waitForFinished()) {
+        emit updateStatus("Installation failed " + process->readAllStandardError());
+        return;
+    }
+    process->deleteLater();
+    emit updateStatus("Successfully installed Desktop Development with C++");
+}
 
 
 

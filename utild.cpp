@@ -16,7 +16,7 @@ void whatExist(const QString&file);
 namespace fs=std::filesystem;
 // /
 //
-const static QVector<QPair<QUrl,QString>> tools{{QUrl("https://aka.ms/vs/17/release/vs_BuildTools.exe"),"vs_build_tools.exe"},
+static QVector<QPair<QUrl,QString>> tools{{QUrl("https://aka.ms/vs/17/release/vs_BuildTools.exe"),"vs_build_tools.exe"},
                           {QUrl("https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"),"ninja-win.zip"},
                           {QUrl("https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"),"cmake-windows.zip"},
                           {QUrl("https://github.com/vishal-ahirwar/aura/releases/latest/download/aura.exe"),"aura.exe"},
@@ -260,7 +260,7 @@ void Utild::canProceed()
         setFilName("Git is not installed or failed to start");
         return;
     }
-
+    scanWhatNeedsToBeInstalled();
     setCan_procceed(true);
 }
 
@@ -268,5 +268,32 @@ void Utild::errorOccured(QString error)
 {
     setFilName(error);
     download_flag=false;
+}
+
+void Utild::scanWhatNeedsToBeInstalled()
+{
+    QVector<QString>toolsNeedsToBeInstalled{"ninja","cmake","clang","vcpkg"};
+    for(const auto&tool:toolsNeedsToBeInstalled)
+    {
+        QProcess process;
+        process.start(tool, QStringList() << "--version");
+
+        if (!process.waitForFinished() || process.error() == QProcess::FailedToStart) {
+            setCan_procceed(false);
+            setFilName("Git is not installed or failed to start");
+            continue;
+        }
+        for(auto&pair:tools)
+        {
+            if(pair.second.contains(tool))
+            {
+                tools.removeOne(pair);
+            }
+        }
+    }
+    if(QFile("C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe").exists()){
+
+        tools.removeFirst();
+    };
 }
 

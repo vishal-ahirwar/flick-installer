@@ -26,6 +26,7 @@ private:
     QString installPath;
 private:
     void installVcpkg();
+    void ifVsAlreadyInstalled();
 };
 
 #endif // INSTALLERWORKER_H

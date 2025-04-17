@@ -65,6 +65,7 @@ private:
     void canProceed();
     void errorOccured(QString error);
     void installVcpkg();
+    void scanWhatNeedsToBeInstalled();
 };
 
 #endif // UTILD_H

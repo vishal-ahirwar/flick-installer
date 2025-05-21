@@ -19,8 +19,8 @@ namespace fs=std::filesystem;
 static QVector<QPair<QUrl,QString>> tools{{QUrl("https://aka.ms/vs/17/release/vs_BuildTools.exe"),"vs_build_tools.exe"},
                           {QUrl("https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"),"ninja-win.zip"},
                           {QUrl("https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"),"cmake-windows.zip"},
-                          {QUrl("https://github.com/vishal-ahirwar/solix/releases/latest/download/solix.exe"),"solix.exe"},
-                          {QUrl("https://raw.githubusercontent.com/vishal-ahirwar/solix/refs/heads/master/res/solix.vsconfig"),"solix.vsconfig"},
+                          {QUrl("https://github.com/vishal-ahirwar/flick/releases/latest/download/flick.exe"),"flick.exe"},
+                          {QUrl("https://raw.githubusercontent.com/vishal-ahirwar/flick/refs/heads/master/res/flick.vsconfig"),"flick.vsconfig"},
                         {QUrl("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"),"clang+llvm19.1.7-windows.tar.xz"}
 };
 
@@ -169,7 +169,7 @@ void Utild::installing() {
     setFilName("Installing tools...");
 
     QTimer::singleShot(1000,[this](){
-        QString path = QDir::homePath() + "/solix";
+        QString path = QDir::homePath() + "/flick";
         QThread* thread = new QThread;
         InstallerWorker* worker = new InstallerWorker(tools, path);
 
@@ -195,7 +195,7 @@ void Utild::addToPath() {
     setDownloadProgress(0.8);
     QTimer::singleShot(1000,[this](){
         auto home=QDir::homePath();
-        home+="/solix";
+        home+="/flick";
         home=QDir::cleanPath(home);
         auto r=QSettings("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", QSettings::NativeFormat).value("path").toString();
         QDirIterator path(home,QDir::NoDotDot|QDir::AllEntries);
@@ -233,7 +233,7 @@ void Utild::onInstallingFinished(){
 };
 void Utild::onAddToPathFinished(){
     setDownloadProgress(1.0);
-    setFilName("solix has been succesfully installed!");
+    setFilName("flick has been succesfully installed!");
     emit complete();
 };
 

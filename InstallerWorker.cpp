@@ -9,7 +9,7 @@ void InstallerWorker::run() {
     QDir homeDir(installPath);
 
     if (!homeDir.exists() && !homeDir.mkpath(".")) {
-        emit updateStatus("Failed to create solix directory");
+        emit updateStatus("Failed to create flick directory");
         emit finished();
         return;
     }
@@ -74,7 +74,7 @@ void InstallerWorker::run() {
                 continue;
             };
             QProcess*process=new QProcess(this);
-            process->start(file,QStringList()<<"--wait"<<"--config"<<"solix.vsconfig");
+            process->start(file,QStringList()<<"--wait"<<"--config"<<"flick.vsconfig");
             connect(process, &QProcess::readyReadStandardError, this, [process]() {
                 QByteArray errorOutput = process->readAllStandardError();
                 qDebug() << "Error:" << errorOutput;
@@ -96,7 +96,7 @@ void InstallerWorker::run() {
             process->deleteLater();
             emit updateStatus("Successfully installed " + file);
         }
-        else if (file.endsWith("solix.exe")) {
+        else if (file.endsWith("flick.exe")) {
             QString dest = installPath + "/" + QFileInfo(file).fileName();
             if (QFile::exists(dest)) {
                 QFile::remove(dest);
@@ -138,7 +138,7 @@ void InstallerWorker::installVcpkg()
                 break;
             }
         });
-        auto path=QDir::homePath()+"/solix/vcpkg";
+        auto path=QDir::homePath()+"/flick/vcpkg";
         process.start("git",QStringList()<<"clone"<<"https://github.com/microsoft/vcpkg.git"<<path);
         process.waitForFinished();
             QProcess c;
@@ -152,7 +152,7 @@ void InstallerWorker::installVcpkg()
 void InstallerWorker::ifVsAlreadyInstalled()
 {
     QProcess*process=new QProcess(this);
-    process->start("C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe",QStringList()<<"modify"<<"--installPath"<<"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools"<<"--config"<<"solix.vsconfig");
+    process->start("C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe",QStringList()<<"modify"<<"--installPath"<<"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools"<<"--config"<<"flick.vsconfig");
     connect(process, &QProcess::readyReadStandardError, this, [process]() {
         QByteArray errorOutput = process->readAllStandardError();
         qDebug() << "Error:" << errorOutput;

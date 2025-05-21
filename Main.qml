@@ -143,7 +143,7 @@ ApplicationWindow {
         Text {
             font.bold: true
             font.pixelSize: 52
-            text: "Solix Installer"
+            text: "flick Installer"
             color: "#253237"
             width: parent.width
             horizontalAlignment: Text.AlignHCenter

@@ -199,6 +199,7 @@ void Utild::addToPath() {
         home=QDir::cleanPath(home);
         auto r=QSettings("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", QSettings::NativeFormat).value("path").toString();
         QDirIterator path(home,QDir::NoDotDot|QDir::AllEntries);
+        r.append(";"+QDir::cleanPath(QDir::homePath()+"/vcpkg"));
         while(path.hasNext()){
             auto p=path.next();
 

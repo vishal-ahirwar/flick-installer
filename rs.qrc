@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/font">
+        <file>Inter-VariableFont.ttf</file>
+    </qresource>
+</RCC>

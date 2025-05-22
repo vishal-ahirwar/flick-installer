@@ -36,6 +36,7 @@ qt_add_qml_module(Flick-Installer
         SOURCES utild.h utild.cpp
         SOURCES InstallerWorker.h
         SOURCES InstallerWorker.cpp
+        RESOURCES rs.qrc
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

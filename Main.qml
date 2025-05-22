@@ -5,8 +5,8 @@ import QtQuick.Controls 2.12
 ApplicationWindow {
     id: loginPage
     visible: true
-    width: 400
-    height: 529
+    width: 339
+    height: 558
     color: "transparent"
     flags: Qt.FramelessWindowHint
     property var btnAbortAction: function () {
@@ -15,73 +15,30 @@ ApplicationWindow {
     Connections {
         target: DownloadManager
         onComplete: {
-            btnAbort.text = "Restart System"
+            btnAbort.text = "Reboot"
             btnAbortAction = function () {
                 //TODO
                 DownloadManager.reboot()
             }
         }
     }
+    FontLoader {
+        id: interFont
+        source: "qrc:/font/Inter-VariableFont.ttf"
+    }
 
     Rectangle {
         anchors.fill: parent
-        radius: 25
-        color: "white"
-
-        Rectangle {
-            anchors.left: parent.left
-            color: "#c2dfe3"
-            width: parent.width * 0.5
-            height: width
-            radius: 999
-            opacity: 0.4
-            anchors.margins: 15
-        }
-        Rectangle {
-            anchors.right: parent.right
-            color: "#c2dfe3"
-            width: parent.width * 0.5
-            height: width
-            radius: 999
-            opacity: 0.4
-            anchors.margins: 15
-        }
-        Rectangle {
-            anchors.top: parent.top
-            color: "#c2dfe3"
-            width: parent.width * 0.5
-            height: width
-            radius: 999
-            opacity: 0.4
-            anchors.margins: 15
-        }
-        Rectangle {
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            color: "#c2dfe3"
-            width: parent.width * 0.5
-            height: width
-            radius: 999
-            opacity: 0.4
-            anchors.margins: 15
-        }
-        Rectangle {
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            color: "#c2dfe3"
-            width: parent.width * 0.5
-            height: width
-            radius: 999
-            opacity: 0.4
-            anchors.margins: 15
-        }
+        radius: 14
+        color: "#0C0D0D"
         Text {
             id: info
             visible: !btnStart.visible
             text: DownloadManager.file_name
             anchors.fill: btnStart
             horizontalAlignment: Text.AlignHCenter
-            color: "#253237"
+            color: "#FFFFFF"
+            font.family: interFont.name
         }
         ProgressBar {
 
@@ -94,7 +51,7 @@ ApplicationWindow {
 
             background: Rectangle {
                 radius: 18
-                color: "#253237"
+                color: "#0033FD"
                 width: parent.width
                 height: parent.height
             }
@@ -107,7 +64,7 @@ ApplicationWindow {
                     width: progressBar.visualPosition * parent.width
                     height: parent.height
                     radius: 18
-                    color: "#69DC9E"
+                    color: "#FFFFFF"
                     visible: !progressBar.indeterminate
                 }
 
@@ -124,7 +81,7 @@ ApplicationWindow {
                             model: progressBar.width / 40 + 1
 
                             Rectangle {
-                                color: "#17a81a"
+                                color: "#FFFFFF"
                                 width: 20
                                 height: progressBar.height
                             }
@@ -141,47 +98,47 @@ ApplicationWindow {
         }
 
         Text {
-            font.bold: true
-            font.pixelSize: 52
-            text: "flick Installer"
-            color: "#253237"
+            font.pixelSize: 32
+            text: "Flick\nInstaller"
+            color: "#FFFFFF"
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             anchors.top: parent.top
             anchors.topMargin: 55
+            font.family: interFont.name
         }
         Text {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 55
-            font.pixelSize: 14
-            text: "Copyright ©2025 Vishal Ahirwar.All rights reseved."
+            font.pixelSize: 16
+            text: "©Vishal Ahirwar."
             horizontalAlignment: Text.AlignHCenter
             width: parent.width
-            color: "#253237"
-            font.bold: true
+            color: "#FFFFFF"
+            font.family: interFont.name
         }
 
         Button {
             id: btnStart
-            text: "Start Installation"
+            text: "Install"
             anchors.centerIn: parent
-            width: 145
-            height: 55
+            width: 217
+            height: 50
             visible: DownloadManager.can_procceed
             background: Rectangle {
                 width: parent.width
                 height: parent.height
-                radius: 10
-                color: "#c2dfe3"
+                radius: 14
+                color: "#0033FD"
             }
             contentItem: Text {
 
                 text: parent.text
-                color: "#253237"
-                font.bold: true
+                color: "#FFFFFF"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 16
+                font.pixelSize: 32
+                font.family: interFont.name
             }
             onClicked: {
                 visible = false
@@ -199,21 +156,21 @@ ApplicationWindow {
                 topMargin: 25
             }
 
-            width: 145
-            height: 55
+            width: 217
+            height: 50
             background: Rectangle {
                 width: parent.width
                 height: parent.height
-                radius: 10
-                color: "#9db4c0"
+                radius: 14
+                color: "#0033FD"
             }
             contentItem: Text {
-                font.pixelSize: 16
+                font.pixelSize: 32
                 text: parent.text
-                color: "#253237"
-                font.bold: true
+                color: "#FFFFFF"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+                font.family: interFont.name
             }
             onClicked: {
                 btnAbortAction()

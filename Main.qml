@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
 
 ApplicationWindow {
     id: loginPage
@@ -9,6 +9,7 @@ ApplicationWindow {
     height: 558
     color: "transparent"
     flags: Qt.FramelessWindowHint
+    visibility: "FullScreen"
     property var btnAbortAction: function () {
         Qt.quit()
     }

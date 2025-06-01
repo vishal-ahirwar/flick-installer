@@ -1,17 +1,17 @@
 #include "utild.h"
-#include<QNetworkRequest>
-#include<QtAlgorithms>
-#include<QFile>
-#include<QFileInfo>
-#include<QProcess>
-#include<QStandardPaths>
-#include<QDir>
-#include<QTimer>
-#include<QSettings>
-#include<QDirIterator>
-#include<QThread>
-#include<InstallerWorker.h>
-#include<QCoreApplication>
+#include <QCoreApplication>
+#include <QDir>
+#include <QDirIterator>
+#include <QFile>
+#include <QFileInfo>
+#include <QNetworkRequest>
+#include <QProcess>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QThread>
+#include <QTimer>
+#include <QtAlgorithms>
+#include "InstallerWorker.h"
 void whatExist(const QString&file);
 namespace fs=std::filesystem;
 // /
@@ -253,14 +253,15 @@ void Utild::setCan_procceed(bool newCan_procceed)
 }
 void Utild::canProceed()
 {
+#ifndef ANDROID
     QProcess process;
     process.start("git", QStringList() << "--version");
-
     if (!process.waitForFinished() || process.error() == QProcess::FailedToStart) {
         setCan_procceed(false);
         setFilName("Git is not installed or failed to start");
         return;
     }
+#endif
     scanWhatNeedsToBeInstalled();
     setCan_procceed(true);
 }

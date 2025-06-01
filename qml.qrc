@@ -2,4 +2,7 @@
     <qresource prefix="/font">
         <file>Inter-VariableFont.ttf</file>
     </qresource>
+    <qresource prefix="/">
+        <file>Main.qml</file>
+    </qresource>
 </RCC>

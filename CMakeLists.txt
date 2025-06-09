@@ -11,7 +11,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
-
+if(STATIC_LINK)
+    set(BUILD_SHARED_LIBS OFF)
+    if (WIN32)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    else()
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+    endif()
+else()
+    set(BUILD_SHARED_LIBS ON)
+endif()
 set(PROJECT_SOURCES
         main.cpp
         utild.cpp

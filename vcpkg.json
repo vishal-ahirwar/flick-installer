@@ -1,0 +1,14 @@
+{
+  "name": "flick-installer",
+  "version": "1.0.0",
+  "builtin-baseline": "9842d45d567ba785627932cca506615b4e43ae6e",
+  "dependencies": [
+    "qtdeclarative"
+  ],
+  "overrides": [
+    {
+      "name": "qtdeclarative",
+      "version": "6.8.3"
+    }
+  ]
+}

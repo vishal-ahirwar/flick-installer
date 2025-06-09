@@ -14,7 +14,7 @@
 #include "InstallerWorker.h"
 
 #if defined(_WIN32)
-#define RELEASE_BUILDS_NAME "flick-windows-latest-zip"
+#define RELEASE_BUILDS_NAME "flick-windows-latest.zip"
 #elif defined(__linux__)
 #define RELEASE_BUILDS_NAME "flick-ubuntu-latest.zip"
 #elif defined(__APPLE__)

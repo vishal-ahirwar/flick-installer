@@ -308,6 +308,7 @@ void Utild::scanWhatNeedsToBeInstalled()
             if(pair.second.contains(tool))
             {
                 tools.removeOne(pair);
+                qDebug()<<"Removing "<<tool<<" as it's already installed!";
             }
         }
     }

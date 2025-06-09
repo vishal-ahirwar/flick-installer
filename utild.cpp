@@ -12,17 +12,35 @@
 #include <QTimer>
 #include <QtAlgorithms>
 #include "InstallerWorker.h"
+
+#if defined(_WIN32)
+#define RELEASE_BUILDS_NAME "flick-windows-latest-zip"
+#elif defined(__linux__)
+#define RELEASE_BUILDS_NAME "flick-ubuntu-latest.zip"
+#elif defined(__APPLE__)
+#define RELEASE_BUILDS_NAME "flick-macos-13.zip"
+#endif
+
+#define BASE_URL "https://github.com/vishal-ahirwar/Flick/releases/latest/download/"
+
 void whatExist(const QString&file);
 namespace fs=std::filesystem;
 // /
 //
-static QVector<QPair<QUrl,QString>> tools{{QUrl("https://aka.ms/vs/17/release/vs_BuildTools.exe"),"vs_build_tools.exe"},
-                          {QUrl("https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"),"ninja-win.zip"},
-                          {QUrl("https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"),"cmake-windows.zip"},
-                          {QUrl("https://github.com/vishal-ahirwar/flick/releases/latest/download/flick.exe"),"flick.exe"},
-                          {QUrl("https://raw.githubusercontent.com/vishal-ahirwar/flick/refs/heads/master/res/flick.vsconfig"),"flick.vsconfig"},
-                        {QUrl("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"),"clang+llvm19.1.7-windows.tar.xz"}
-};
+static QVector<QPair<QUrl, QString>>
+    tools{{QUrl("https://aka.ms/vs/17/release/vs_BuildTools.exe"), "vs_build_tools.exe"},
+          {QUrl("https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"),
+           "ninja-win.zip"},
+          {QUrl("https://github.com/Kitware/CMake/releases/download/v3.31.5/"
+                "cmake-3.31.5-windows-x86_64.zip"),
+           "cmake-windows.zip"},
+          {QUrl(QString(BASE_URL) + QString(RELEASE_BUILDS_NAME)), RELEASE_BUILDS_NAME},
+          {QUrl("https://raw.githubusercontent.com/vishal-ahirwar/flick/refs/heads/master/res/"
+                "flick.vsconfig"),
+           "flick.vsconfig"},
+          {QUrl("https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/"
+                "clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"),
+           "clang+llvm19.1.7-windows.tar.xz"}};
 
 Utild::Utild(QObject *parent)
     : QObject{parent},_current_index{0}

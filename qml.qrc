@@ -5,4 +5,5 @@
     <qresource prefix="/">
         <file>Main.qml</file>
     </qresource>
+    <qresource prefix="/img"/>
 </RCC>

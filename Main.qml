@@ -9,7 +9,7 @@ ApplicationWindow {
     height: 558
     color: "transparent"
     flags: Qt.FramelessWindowHint
-    visibility: "FullScreen"
+    // visibility: "FullScreen"
     property var btnAbortAction: function () {
         Qt.quit()
     }
@@ -109,13 +109,13 @@ ApplicationWindow {
             font.family: interFont.name
         }
         Text {
+            font.pixelSize: 12
+            text: "BY Vishal Ahirwar"
+            color: "gray"
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 55
-            font.pixelSize: 16
-            text: "©Vishal Ahirwar."
-            horizontalAlignment: Text.AlignHCenter
-            width: parent.width
-            color: "#FFFFFF"
             font.family: interFont.name
         }
 

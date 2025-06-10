@@ -8,7 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
 if(STATIC_LINK)
@@ -22,12 +22,12 @@ else()
     set(BUILD_SHARED_LIBS ON)
 endif()
 set(PROJECT_SOURCES
-        main.cpp
-        utild.cpp
-        utild.h
-        InstallerWorker.cpp
-        InstallerWorker.h
-        qml.qrc
+        src/main.cpp
+        src/utild.cpp
+        src/utild.h
+        src/InstallerWorker.cpp
+        src/InstallerWorker.h
+        qml/qml.qrc
 )
 if (ANDROID)
     include(FetchContent)

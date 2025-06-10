@@ -17,6 +17,7 @@ ApplicationWindow {
         target: DownloadManager
         onComplete: {
             btnAbort.text = "Reboot"
+            btnQuit.visible=true
             btnAbortAction = function () {
                 //TODO
                 DownloadManager.reboot()
@@ -175,6 +176,37 @@ ApplicationWindow {
             }
             onClicked: {
                 btnAbortAction()
+            }
+        }
+        Button {
+            visible:false
+            id: btnQuit
+            text: "Quit"
+            anchors {
+                top: btnAbort.bottom
+                left: btnAbort.left
+                right: btnAbort.right
+                topMargin: 25
+            }
+
+            width: 217
+            height: 50
+            background: Rectangle {
+                width: parent.width
+                height: parent.height
+                radius: 14
+                color: "#fd0000"
+            }
+            contentItem: Text {
+                font.pixelSize: 32
+                text: parent.text
+                color: "#FFFFFF"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font.family: interFont.name
+            }
+            onClicked: {
+                Qt.quit()
             }
         }
     }

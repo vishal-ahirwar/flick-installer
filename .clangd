@@ -1,0 +1,18 @@
+CompileFlags:
+  CompilationDatabase: build/windows-static-build
+
+FallbackFlags:
+  - -std=c++23
+  - -Wall
+  - -Wextra
+  - -O0
+  - -fdiagnostics-color=always
+
+Index:
+  Background: true
+
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add: '*'
+

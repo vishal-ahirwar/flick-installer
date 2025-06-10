@@ -55,6 +55,7 @@ private:
     qint16 _current_index{};
     bool m_can_procceed{};
     bool download_flag{true};
+    bool mIsInstallingVCPKG{};
 private:
     void onError(QNetworkReply::NetworkError);
     void downloadProgress(qint64,qint64);
